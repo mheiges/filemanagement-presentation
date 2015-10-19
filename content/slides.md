@@ -85,6 +85,7 @@ workflow sort of does this by writing to slow filesystem vs database on fast fil
 ## Problems faced with current implementations
 
 
+
 ## File Management Use Cases
   - apiSiteFiles
     - bulk data downloads
@@ -263,4 +264,4 @@ iRODS is
   - Workspaces and step analysis are expected to add significant data influx and efflux to our system.
   - Our existing file data management is inadequate to accomodate workspaces.
   - iRODS is needed to manage application data across distributed, heterogeneous storage systems.
-  - Other use cases may apply.
+  - Other use cases for iRODS may apply.
