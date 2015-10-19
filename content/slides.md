@@ -1,4 +1,4 @@
-**Application File Management for EuPathDB**
+**File Management for EuPathDB**
 
 October 19, 2015
 
@@ -10,9 +10,13 @@ October 19, 2015
 
 ## Topics
 
-  - File management
-  - Relevance to others
-    - what build artifacts may be useful to others
+  - Existing file management Scenarios at EuPathDB
+  - Problems faced with current implementations
+  - Propose technology to address these problems
+
+
+
+## Existing file management Scenarios at EuPathDB
 
 
 
@@ -75,15 +79,18 @@ Note:
 
 
 
-## File management
-  - replication
-    - UGA <-> Penn <-> Globus <-> other
+## Problems faced with current implementations
+
+
+
+## File management issues
+  - replication is complicated
+    - UGA <-> Penn <-> other
   - volume partitioning
     - single 100TB volume or several 10TB volumes?
-      - how to re-allocate data if we exceed a 10TB volume and need to split
+      - how to re-allocate data if we exceed a 10TB volume and need to split?
   - co-administration
-    - (see staff demographics)
-    - w/o iRODS, need root permissions and knowledge of file locations
+    - need root permissions and knowledge of file locations
   - file ownership
     - tomcat, apache, staff, etc
 
@@ -95,22 +102,23 @@ Note:
     - webservice files
     - auxiliary files (whitepapers, large images)
   - custom GBrowse tracks
-  - Provider
+  - Provider data (manualDelivery)
   - Community Uploads
   - Workflow
-  - Workspaces
+  - *Workspaces*
 
 
 
 #### Existing Use Cases
 ## apiSiteFiles
-  - immediate publication of bulk data downloads
   - manual rsync from data dev to websites
     - attempts to automate have been unsuccessful due to the scale (6TB, 4 million files, 0.5 million directories, depth=8)
   - excessive duplication
     - each release gets a (mostly) copy of previous
-    - manual pruning of old releases
-    - BRC-3 budget for de-duplicating storage
+    - BRC-3 pays for costly de-duplicating storage
+    - requires manual pruning of old releases (alleviated by de-dup)
+  - file ownership/permission conflicts
+  - immediate publication of bulk data downloads
 
 
 
@@ -118,12 +126,14 @@ Note:
 ## custom Gbrowse tracks
   - originally, track data stored with website installation and lost with each rebuild
   - now track data stored in a common directory where it accumulates, unmanaged
-    - wasted storage of obsolete data
+    - storage wasted on obsolete data
   - not replicated to other webservers so no guarantee availability
 
 
+
 #### Existing Use Cases
-## Provider Data
+## Provider Data (manualDelivery)
+- no redundancy
 
 
 
@@ -133,153 +143,101 @@ Note:
   - files: Unison bidirectional replication (minutes)
   - checksum recorded but no followup validation checks
   - no monitoring fs are in sync (assume eventual consistency on next rsync run)
-  - ok for current light usage
+  - ok for current light usage, not scalable
 
 
 
 #### Existing Use Cases
-## OrthoMCL Proteome Mapping Service
-- difficult to know status of files in pipeline
-- insufficient integrity checks when copying files between systems
+### OrthoMCL Proteome Mapping Service
+  - user input needs to be validated at upload time
+  - difficult to know status of files in pipeline
+  - insufficient integrity checks when copying files between systems
+  - no failover
 
 
 
-## Biggest Issues
-  - maintaining file ownership
-  - replication
-  - integrity checks
-  - locating files
-  - cron is terribly unmanageable for production applications
-  - inotify is cumbersome to setup
-    - re-queue failed tasks
+## Summary of Issues
+  - difficulty maintaining file ownership
+    - apache, tomcat, individual staff
+  - replication difficulties
+    - rsync + cron does not scale
+      - cron is terribly unmanageable for production applications
+    - rsync + inotify is cumbersome to setup, re-queue failed tasks
+    - distributed filesystems are not well supported over WAN
+  - file integrity checks rarely done, if ever
+  - time-consuming, error-prone to locate files for syncing, modification, troubleshooting
 
 
 
-## Filesystem Sync Software
-  - Unison
-  - Aspera Sync
-  - WAN Distributed Filesystem
-    - XtreemFS
-    - GlusterFS
-    - MooseFS
+
+# The Solution
 
 
 
-**Filesystem Middleware**
+**Take this**  
+![multiplefs](content/images/Slide21.png)
+
+
+
+**Insert Filesystem Middleware**  
 ![multiplefs](content/images/Slide22.png)
 
 
 
-## User Demographics
-  - bench scientist
-  - HTS Center
-  - EupathDB Staff
-    - Outreach
-    - programmers
-    - admins
+**Filesystem Middleware**
+  - Nirvana
+  - DSpace
+  - **iRODS**
 
 
 
-## iRODS direct access vs behind our UI
+## iRODS
+  - "**I**ntegrated **R**ule-**O**riented **D**ata **S**ystem"
 
 
 
-## Technology Assessment
+iRODS is a
+### uniform interface to distributed, heterogeneous storage systems
 
-Given existing tech that addresses a problem,  
-do we adopt it?
-
-- Feature set
-  - state of documentation
-  - documentation
-  - community/vendor support
-  - extensible
-    - custom modules
-    - API
-- Ambiguous, open-ended requirements
-
-
-## User Demographics
-
-- bench scientist
-- informatics center (MaHPIC)
-- EuPathDB staff
-  - outreach
-  - admins
-  - application programmers
+![multiplefs](content/images/Slide25.png)
 
 
 
-## Ongoing issues
-
-- managing GBrowse data
-  - periodically deleting stale
-  - not available after failover
-- community file uploads
-- download files
-  - sync == publish
-- apiSiteFiles
-  - replication to mirrors
-- manual delivery
-  - ownership/permissions
-  - no failover
-  - no distinction between derived and gold copy
-- OrthoMCL mapping service
-  - failover for results
-
-- maintaining file ownership and syncing
-  - apache, tomcat, others
-  - requires root rsync
-    - dangerous. difficult to secure.
-
-- when to sync
-  - inotify
-    - complex
-  - cron
-    - how often?
-      - too frequent: excessive notifications when remote node offline
-      - less frequent: race conditions when failing over
-
-- User quotas
-  - can iRODS report usage by user? (e.g. for 'user' by attribute, total bytes stored)
-
-## Microservices
-
-- curl
-  - myCurl.get("ftp.ncbi.nih.gov/gene/DATA/gene2pubmed.gz", "/ebrcZone/manualDelivery/common/dbxref/gene2pubmed.gz");
-
-## Strengths
-
-## Weaknesses
-
-
-## Metrics
-
-- log data access (rule)
-  - how often is X downloaded?
-
-## Costs
-
-- expect to send staff to training
+iRODS allows
+### File access via unified namespace
+![multiplefs](content/images/Slide23.png)
 
 
 
-## Similar Solutions
-
-- Nirvana
-  - similar feature set (SRB common ancestor)
-  - commercial
-- Fedora
-  - targeted for long-term archiving
-  - no native replication? iRODS backend integration for that.
-- DSpace
-- misc. academic and gov't projects
-- http://www.stevemoranscustomrods.com
+iRODS provides
+### Automated Data Operations
+- validating checksums when adding, removing files
+- validating file format
+- archiving data that has not been accessed for over 6 months
+- check for viruses when someone uploads a Community file
 
 
 
-## iRODS Use Cases
-- document archive: grants, RFP, reports
-- datasets for community downloads, shared with workflow
-- federate data hosted by collaborators, e.g. MaHPIC, Liverpool
+iRODS has
+### Robust Metadata Catalog
+Assign arbitrary attributes to files, collections, etc.
+![multiplefs](content/images/Slide24.png)
 
+
+
+iRODS aids
+### Security Compliance
+  - Access control, e.g. secure HIPAA data
+  - Audit trails
+  - Enforce retention policies
+
+
+
+![](content/irods-images/Slide12.png)
+
+
+
+## Final
+
+  - iRODS is needed to manage application data across distributed, heterogeneous storage systems
+  - other use cases may apply
