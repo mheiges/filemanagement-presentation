@@ -10,7 +10,7 @@ October 19, 2015
 
 ## Topics
 
-  - Existing file management Scenarios at EuPathDB
+  - Existing file management scenarios at EuPathDB
   - Problems faced with current implementations
   - Propose technology to address these problems
 
@@ -64,7 +64,7 @@ Filesystem replicated bidirectionally.
 
 **Replication at the storage level**
 ![multiplefs](content/images/Slide20.png)
-- offsite archive redundancy (_planned_)
+- disaster recovery (_planned_)
 
 Note:
 - For data too large for traditional backup.
@@ -74,6 +74,8 @@ Note:
 
 **Multiple Applications write to multiple storage classes.**  
 ![multiplefs](content/images/Slide21.png)
+- *step analysis??*
+- *workspaces??*
 
 Note:
 
@@ -170,7 +172,7 @@ Note:
 
 
 
-# The Solution
+# A Solution
 
 
 
@@ -211,6 +213,7 @@ iRODS allows
 
 iRODS provides
 ### Automated Data Operations
+Defined with Rules
 - validating checksums when adding, removing files
 - validating file format
 - archiving data that has not been accessed for over 6 months
@@ -237,7 +240,9 @@ iRODS aids
 
 
 
-## Final
+## Final Take-home
 
-  - iRODS is needed to manage application data across distributed, heterogeneous storage systems
-  - other use cases may apply
+  - Workspaces and step analysis are expected to add data influx and efflux to our system.
+  - Our existing file data management is inadequate to accomodate workspaces.
+  - iRODS is needed to manage application data across distributed, heterogeneous storage systems.
+  - other use cases may apply.
