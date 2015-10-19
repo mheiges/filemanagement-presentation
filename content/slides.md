@@ -16,11 +16,11 @@ October 19, 2015
 
 
 
-## Existing file management Scenarios at EuPathDB
+## Existing file management scenarios at EuPathDB
 
 
 
-Application reads/writes to single filesystem
+**Application reads/writes to single filesystem**
 ![singlefs](content/images/Slide16.png)
 - provider data
 - GBrowse custom tracks
@@ -44,8 +44,8 @@ different storage characteristics (e.g. archival))
 
 
 
-**Application writes to single filesystem.**  
-Filesystem replicated.
+**Application writes to single filesystem with**  
+**filesystem replicated.**
 ![multiplefs](content/images/Slide18.png)
 - apiSiteFiles
 
@@ -78,29 +78,16 @@ Note:
 - *workspaces??*
 
 Note:
+workflow sort of does this by writing to slow filesystem vs database on fast filesystem
 
 
 
 ## Problems faced with current implementations
 
 
-
-## File management issues
-  - replication is complicated
-    - UGA <-> Penn <-> other
-  - volume partitioning
-    - single 100TB volume or several 10TB volumes?
-      - how to re-allocate data if we exceed a 10TB volume and need to split?
-  - co-administration
-    - need root permissions and knowledge of file locations
-  - file ownership
-    - tomcat, apache, staff, etc
-
-
-
 ## File Management Use Cases
   - apiSiteFiles
-    - Bulk data downloads
+    - bulk data downloads
     - webservice files
     - auxiliary files (whitepapers, large images)
   - custom GBrowse tracks
@@ -136,6 +123,7 @@ Note:
 #### Existing Use Cases
 ## Provider Data (manualDelivery)
 - no redundancy
+- no failover
 
 
 
@@ -158,17 +146,39 @@ Note:
 
 
 
-## Summary of Issues
-  - difficulty maintaining file ownership
-    - apache, tomcat, individual staff
-  - replication difficulties
-    - rsync + cron does not scale
-      - cron is terribly unmanageable for production applications
-    - rsync + inotify is cumbersome to setup, re-queue failed tasks
-    - distributed filesystems are not well supported over WAN
-  - file integrity checks rarely done, if ever
-  - time-consuming, error-prone to locate files for syncing, modification, troubleshooting
+#### Summary
+## File management complications
+  - matching application server with data server
+    - time-consuming, error-prone to locate files for syncing, modification, troubleshooting
+  - each file management scenario is treated differently
+    - unidirectional replication
+    - bidirectional replication
 
+
+
+#### Summary
+## File management complications
+  - rsync + cron
+    - does not scale
+    - cron is terribly unmanageable for production applications
+  - rsync + inotify
+    - does not scale
+    - rsync + inotify is cumbersome to setup, re-queue failed tasks
+  - rsync-ssh authentication and security, esp. when running as root
+
+
+
+#### Summary
+## File management complications
+  - volume partitioning
+    - single 100TB volume or ten 10TB volumes?
+      - how to re-allocate data if we exceed a 10TB volume and need to split?
+      - how does the application handle that?
+  - file ownership
+    - tomcat, apache, staff, etc
+  - co-administration
+    - need root permissions and knowledge of file locations
+  - file integrity checks rarely done, if ever
 
 
 
@@ -214,9 +224,9 @@ iRODS allows
 iRODS provides
 ### Automated Data Operations
 Defined with Rules
-- validating checksums when adding, removing files
-- validating file format
-- archiving data that has not been accessed for over 6 months
+- validate checksums when adding, removing files
+- validate file format when adding a file
+- archive data that has not been accessed for over 6 months
 - check for viruses when someone uploads a Community file
 
 
@@ -230,19 +240,27 @@ Assign arbitrary attributes to files, collections, etc.
 
 iRODS aids
 ### Security Compliance
-  - Access control, e.g. secure HIPAA data
+  - Access control
+    - e.g. secure personally identifiable information
   - Audit trails
   - Enforce retention policies
 
 
 
-![](content/irods-images/Slide12.png)
+iRODS is
+### Extensible
+  - rules
+  - microservices
+  - plugins
+  - APIs
+    - REST
+    - Java, Python, PHP, others
 
 
 
 ## Final Take-home
 
-  - Workspaces and step analysis are expected to add data influx and efflux to our system.
+  - Workspaces and step analysis are expected to add significant data influx and efflux to our system.
   - Our existing file data management is inadequate to accomodate workspaces.
   - iRODS is needed to manage application data across distributed, heterogeneous storage systems.
-  - other use cases may apply.
+  - Other use cases may apply.
